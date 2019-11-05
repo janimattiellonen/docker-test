@@ -1,9 +1,4 @@
-version: '3'
-
-networks:
-  default:
-    external:
-      name: nginx-proxy
+version: "3"
 
 services:
   nginx-proxy:
@@ -11,11 +6,8 @@ services:
     container_name: nginx-proxy
     ports:
       - "80:80"
-    links:
-      - app1
-      - app2
     volumes:
-    - /var/run/docker.sock:/tmp/docker.sock:ro
+      - /var/run/docker.sock:/tmp/docker.sock:ro
 
   app1:
     container_name: app1
@@ -23,10 +15,8 @@ services:
       context: ./apps/app1
     volumes:
       - ./apps/app1:/app
-    expose:
-      - 80
     environment:
-      VIRTUAL_HOST: app1.local
+      VIRTUAL_HOST: app1.tunk.io
       NGINX_PROXY_CONTAINER: nginx-proxy
     depends_on:
       - mariadb
@@ -36,10 +26,8 @@ services:
       context: ./apps/app2
     volumes:
       - ./apps/app2:/app
-    expose:
-      - 80
     environment:
-      VIRTUAL_HOST: app2.local
+      VIRTUAL_HOST: app2.tunk.io
       NGINX_PROXY_CONTAINER: nginx-proxy
     depends_on:
       - mariadb
@@ -50,4 +38,4 @@ services:
     environment:
       - MYSQL_ALLOW_EMPTY_PASSWORD=yes
     ports:
-      - '3307:3306'
+      - "3307:3306"
