@@ -1,0 +1,53 @@
+version: '3'
+
+networks:
+  default:
+    external:
+      name: nginx-proxy
+
+services:
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    container_name: nginx-proxy
+    ports:
+      - "80:80"
+    links:
+      - app1
+      - app2
+    volumes:
+    - /var/run/docker.sock:/tmp/docker.sock:ro
+
+  app1:
+    container_name: app1
+    build:
+      context: ./apps/app1
+    volumes:
+      - ./apps/app1:/app
+    expose:
+      - 80
+    environment:
+      VIRTUAL_HOST: app1.local
+      NGINX_PROXY_CONTAINER: nginx-proxy
+    depends_on:
+      - mariadb
+  app2:
+    container_name: app2
+    build:
+      context: ./apps/app2
+    volumes:
+      - ./apps/app2:/app
+    expose:
+      - 80
+    environment:
+      VIRTUAL_HOST: app2.local
+      NGINX_PROXY_CONTAINER: nginx-proxy
+    depends_on:
+      - mariadb
+  mariadb:
+    build:
+      context: .
+      dockerfile: ./provisioning/mariadb/Dockerfile
+    environment:
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+    ports:
+      - '3307:3306'
